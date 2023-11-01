@@ -15,13 +15,15 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IResult> GetUserAync(string id)
+    public async Task<IResult> GetUserAsync(string id)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            await db.GetUserAsync(id);
+            var result = await db.GetUserAsync(id);
+            if (result != null)
+                return Results.Json(result);
+            return Results.NotFound(new { message = "Not Found" });
         }
-        return Results.NotFound(new { message = "Not Found" });
     }
 
     [HttpGet("users/{page}")]
@@ -29,9 +31,8 @@ public class UserController : ControllerBase
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            await db.GetUsersAsync(page, pageSize);
+            return await db.GetUsersAsync(page, pageSize);
         }
-        return null;
     }
 
     [HttpPost("create")]
@@ -42,9 +43,8 @@ public class UserController : ControllerBase
             user.Id = Guid.NewGuid().ToString();
             using (ApplicationContext db = new ApplicationContext())
             {
-                await db.AddUserAsync(user);
+                return Results.Json(await db.AddUserAsync(user));
             }
-            return Results.Json(user);
         }
         return Results.BadRequest(new { message = "Incorrect data" });
     }
@@ -55,9 +55,12 @@ public class UserController : ControllerBase
         if (ModelState.IsValid)
             using (ApplicationContext db = new ApplicationContext())
             {
-                await db.UpdateUserAsync(userData);
+                var result = await db.UpdateUserAsync(userData);
+                if (result != null)
+                    return Results.Json(result);
+                return Results.NotFound(new { message = "Not Found" });
             }
-        return Results.NotFound(new { message = "Not Found" });
+        return Results.BadRequest(new { message = "Incorrect data" });
     }
 
     [HttpDelete("{id}/delete")]
@@ -65,8 +68,10 @@ public class UserController : ControllerBase
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            await db.DeleteUserAsync(id);
+            var result = await db.DeleteUserAsync(id);
+            if (result != null)
+                return Results.Json(result);
+            return Results.NotFound(new { message = "Not Found" });
         }
-        return Results.NotFound(new { message = "Not Found" });
     }
 }

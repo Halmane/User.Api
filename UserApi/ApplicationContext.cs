@@ -12,13 +12,14 @@ public class ApplicationContext : DbContext
         optionsBuilder.UseSqlite("Data Source=Users.db");
     }
 
-    public async Task AddUserAsync(User user)
+    public async Task<User> AddUserAsync(User user)
     {
         await Users.AddAsync(user);
         await SaveChangesAsync();
+        return user;
     }
 
-    public async Task<IResult> UpdateUserAsync(User userData)
+    public async Task<User> UpdateUserAsync(User userData)
     {
         var user = await Users.FindAsync(userData.Id);
         if (user != null)
@@ -27,38 +28,29 @@ public class ApplicationContext : DbContext
             user.Name = userData.Name;
             user.Surname = userData.Surname;
             await SaveChangesAsync();
-            return Results.Json(user);
         }
-        return Results.NotFound(new { message = "Not Found" });
+        return user;
     }
 
-    public async Task<IResult> DeleteUserAsync(string id)
+    public async Task<User> DeleteUserAsync(string id)
     {
         var user = await Users.FindAsync(id);
         if (user != null)
         {
             Users.Remove(user);
             SaveChanges();
-            return Results.Json(user);
         }
-        return Results.NotFound(new { message = "Not Found" });
+        return user;
     }
 
-    public async Task<IResult> GetUserAsync(string id)
+    public async Task<User> GetUserAsync(string id)
     {
         var user = await Users.FindAsync(id);
-        if (user != null)
-        {
-            return Results.Json(user);
-        }
-        return Results.NotFound(new { message = "Not Found" });
+        return user;
     }
 
     public async Task<List<User>> GetUsersAsync(int page = 0, int pageSize = 10)
     {
-        return await Users
-         .Skip(page * pageSize)
-         .Take(pageSize)
-         .ToListAsync();
+        return await Users.Skip(page * pageSize).Take(pageSize).ToListAsync();
     }
 }
