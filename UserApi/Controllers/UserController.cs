@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace UserApi.Controllers;
@@ -27,11 +29,14 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("users/{page}")]
-    public async Task<List<User>> GetUsersAsync(int page = 0, int pageSize = 10)
+    public async Task<IResult> GetUsersAsync(int page = 0, int pageSize = 10)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            return await db.GetUsersAsync(page, pageSize);
+            var result = await db.GetUsersAsync(page, pageSize);
+            if (result != null)
+                return Results.Json(result);
+            return Results.NotFound(new { message = "Not Found" });
         }
     }
 
