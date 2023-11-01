@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace UserApi.Controllers;
 
@@ -14,74 +15,56 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IResult GetUser(string id)
+    public async Task<IResult> GetUserAync(string id)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            var user = db.Users.Find(id);
-            if (user != null)
-            {
-                return Results.Json(user);
-            }
+            await db.GetUserAsync(id);
         }
         return Results.NotFound(new { message = "Not Found" });
     }
 
-    [HttpGet("users")]
-    public List<User> GetUsers()
+    [HttpGet("users/{page}")]
+    public List<User> GetUsers(int page)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            var users = db.Users.ToList();
-            return users;
+            return db.GetUsers(page);
         }
     }
 
-    [HttpPost("user")]
-    public User PostUser(string name, string surname, int age)
+    [HttpPost("create")]
+    public async Task<IResult> PostUserAsync(User user)
     {
-        var user = new User(name, surname, age);
-        user.Id = Guid.NewGuid().ToString();
-        using (ApplicationContext db = new ApplicationContext())
+        if (ModelState.IsValid)
         {
-            db.Users.Add(user);
-            db.SaveChanges();
-        }
-        return user;
-    }
-
-    [HttpPut("user")]
-    public IResult ChangeUser(string id, string name, string surname, int age)
-    {
-        var userData = new User(name, surname, age);
-        userData.Id = id;
-        using (ApplicationContext db = new ApplicationContext())
-        {
-            var user = db.Users.Find(userData.Id);
-            if (user != null)
+            user.Id = Guid.NewGuid().ToString();
+            using (ApplicationContext db = new ApplicationContext())
             {
-                user.Age = userData.Age;
-                user.Name = userData.Name;
-                user.Surname = userData.Surname;
-                db.SaveChanges();
-                return Results.Json(user);
+                await db.AddUserAsync(user);
             }
+            return Results.Json(user);
         }
+        return Results.NotFound(new { message = "Incorrect data" });
+    }
+
+    [HttpPut("update")]
+    public async Task<IResult> ChangeUserAsync(User userData)
+    {
+        if (ModelState.IsValid)
+            using (ApplicationContext db = new ApplicationContext())
+            {
+                await db.UpdateUserAsync(userData);
+            }
         return Results.NotFound(new { message = "Not Found" });
     }
 
-    [HttpDelete("{id}")]
-    public IResult DeleteUser(string id)
+    [HttpDelete("{id}/delete")]
+    public async Task<IResult> DeleteUserAsync(string id)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            var user = db.Users.Find(id);
-            if (user != null)
-            {
-                db.Users.Remove(user);
-                db.SaveChanges();
-                return Results.Json(user);
-            }
+            await db.DeleteUserAsync(id);
         }
         return Results.NotFound(new { message = "Not Found" });
     }
