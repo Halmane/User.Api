@@ -38,7 +38,7 @@ public class ApplicationContext : DbContext
         if (user != null)
         {
             Users.Remove(user);
-            SaveChanges();
+            await SaveChangesAsync();
         }
         return user;
     }
