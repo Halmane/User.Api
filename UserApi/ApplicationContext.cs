@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Drawing.Printing;
 
 namespace UserApi;
 
@@ -53,25 +54,11 @@ public class ApplicationContext : DbContext
         return Results.NotFound(new { message = "Not Found" });
     }
 
-    public List<User> GetUsers(int page)
-    { 
-        if (page <= 0)
-            page = 1;
-        var usersCount = Users.Count();
-        var userCountOnPage = usersCount - (10 * (page-1));
-
-        if (userCountOnPage > 10)
-            userCountOnPage = 10;
-
-
-        List<User> users;
-        if (userCountOnPage < 0)
-        {
-            var skipedSures = (usersCount / 10) * 10;
-            users = Users.Skip(skipedSures).Take(Users.Count() - skipedSures).ToList();
-            return users;
-        }
-        users = Users.Skip(10 * (page - 1)).Take(userCountOnPage).ToList();
-        return users;
+    public async Task<List<User>> GetUsersAsync(int page = 0, int pageSize = 10)
+    {
+        return await Users
+         .Skip(page * pageSize)
+         .Take(pageSize)
+         .ToListAsync();
     }
 }

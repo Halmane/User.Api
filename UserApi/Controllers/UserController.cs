@@ -25,12 +25,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("users/{page}")]
-    public List<User> GetUsers(int page)
+    public async Task<List<User>> GetUsersAsync(int page = 0, int pageSize = 10)
     {
         using (ApplicationContext db = new ApplicationContext())
         {
-            return db.GetUsers(page);
+            await db.GetUsersAsync(page, pageSize);
         }
+        return null;
     }
 
     [HttpPost("create")]
@@ -45,7 +46,7 @@ public class UserController : ControllerBase
             }
             return Results.Json(user);
         }
-        return Results.NotFound(new { message = "Incorrect data" });
+        return Results.BadRequest(new { message = "Incorrect data" });
     }
 
     [HttpPut("update")]
