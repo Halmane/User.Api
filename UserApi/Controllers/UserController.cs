@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System;
+using System.Threading;
 
 namespace UserApi.Controllers;
 
@@ -20,13 +21,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IResult> GetUserAsync(string id)
+    public async Task<IResult> GetUserAsync(string id, CancellationToken cancellationToken)
     {
         try
         {
             using (_context)
             {
-                var result = await _context.GetUserAsync(id);
+                var result = await _context.GetUserAsync(id, cancellationToken);
                 if (result != null)
                     return Results.Json(result);
                 _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(GetUserAsync), id);
@@ -41,13 +42,13 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("users/{page}")]
-    public async Task<IResult> GetUsersAsync(int page = 0, int pageSize = 10)
+    public async Task<IResult> GetUsersAsync(CancellationToken cancellationToken, int page = 0, int pageSize = 10)
     {
         try
         {
             using (_context)
             {
-                var result = await _context.GetUsersAsync(page, pageSize);
+                var result = await _context.GetUsersAsync(cancellationToken, page, pageSize);
                 if (result != null)
                     return Results.Json(result);
                 _logger.LogWarning("{MethodName} => Users Not Found {result}", nameof(GetUsersAsync), result);
@@ -62,7 +63,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IResult> PostUserAsync(User user)
+    public async Task<IResult> PostUserAsync(User user, CancellationToken cancellationToken)
     {
         try
         {
@@ -74,7 +75,7 @@ public class UserController : ControllerBase
             user.Id = Guid.NewGuid().ToString();
             using (_context)
             {
-                return Results.Json(await _context.AddUserAsync(user));
+                return Results.Json(await _context.AddUserAsync(user, cancellationToken));
             }
         }
         catch (Exception ex)
@@ -85,14 +86,14 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IResult> ChangeUserAsync(User userData)
+    public async Task<IResult> ChangeUserAsync(User userData, CancellationToken cancellationToken)
     {
         try
         {
             if (ModelState.IsValid)
                 using (_context)
                 {
-                    var result = await _context.UpdateUserAsync(userData);
+                    var result = await _context.UpdateUserAsync(userData, cancellationToken);
                     if (result != null)
                         return Results.Json(result);
                     _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(ChangeUserAsync), userData.Id);
@@ -109,13 +110,13 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("{id}/delete")]
-    public async Task<IResult> DeleteUserAsync(string id)
+    public async Task<IResult> DeleteUserAsync(string id, CancellationToken cancellationToken)
     {
         try
         {
             using (_context)
             {
-                var result = await _context.DeleteUserAsync(id);
+                var result = await _context.DeleteUserAsync(id, cancellationToken);
                 if (result != null)
                     return Results.Json(result);
                 _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(DeleteUserAsync), id);

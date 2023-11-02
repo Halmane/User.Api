@@ -12,14 +12,14 @@ public class ApplicationDBContext : DbContext
         optionsBuilder.UseSqlite("Data Source=Users.db");
     }
 
-    public async Task<User> AddUserAsync(User user)
+    public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
     {
         await Users.AddAsync(user);
         await SaveChangesAsync();
         return user;
     }
 
-    public async Task<User> UpdateUserAsync(User userData)
+    public async Task<User> UpdateUserAsync(User userData, CancellationToken cancellationToken)
     {
         var user = await Users.FindAsync(userData.Id);
         if (user != null)
@@ -32,7 +32,7 @@ public class ApplicationDBContext : DbContext
         return user;
     }
 
-    public async Task<User> DeleteUserAsync(string id)
+    public async Task<User> DeleteUserAsync(string id, CancellationToken cancellationToken)
     {
         var user = await Users.FindAsync(id);
         if (user != null)
@@ -43,13 +43,13 @@ public class ApplicationDBContext : DbContext
         return user;
     }
 
-    public async Task<User> GetUserAsync(string id)
+    public async Task<User> GetUserAsync(string id, CancellationToken cancellationToken)
     {
         var user = await Users.FindAsync(id);
         return user;
     }
 
-    public async Task<List<User>> GetUsersAsync(int page = 0, int pageSize = 10)
+    public async Task<List<User>> GetUsersAsync(CancellationToken cancellationToken , int page = 0, int pageSize = 10)
     {
         return await Users.Skip(page * pageSize).Take(pageSize).ToListAsync();
     }
