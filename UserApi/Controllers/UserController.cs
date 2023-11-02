@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System;
 
 namespace UserApi.Controllers;
@@ -9,11 +10,13 @@ namespace UserApi.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
+    readonly ILogger<UserController> _logger;
     private readonly ApplicationContext _context;
 
-    public UserController(ApplicationContext context)
+    public UserController(ApplicationContext context, ILogger<UserController> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     [HttpGet("{id}")]
@@ -24,6 +27,7 @@ public class UserController : ControllerBase
             var result = await db.GetUserAsync(id);
             if (result != null)
                 return Results.Json(result);
+            _logger.LogError("GetUserAsync => User Not Found {@result}", result);
             return Results.NotFound(new { message = "Not Found" });
         }
     }
@@ -36,6 +40,7 @@ public class UserController : ControllerBase
             var result = await db.GetUsersAsync(page, pageSize);
             if (result != null)
                 return Results.Json(result);
+            _logger.LogError("GetUsersAsync => User Not Found {@result}", result);
             return Results.NotFound(new { message = "Not Found" });
         }
     }
@@ -51,6 +56,7 @@ public class UserController : ControllerBase
                 return Results.Json(await db.AddUserAsync(user));
             }
         }
+        _logger.LogError("PostUserAsync => User Incorrect data {@result}", user);
         return Results.BadRequest(new { message = "Incorrect data" });
     }
 
@@ -63,8 +69,10 @@ public class UserController : ControllerBase
                 var result = await db.UpdateUserAsync(userData);
                 if (result != null)
                     return Results.Json(result);
+                _logger.LogError("ChangeUserAsync => User Not Found {@result}", result);
                 return Results.NotFound(new { message = "Not Found" });
             }
+        _logger.LogError("ChangeUserAsync => User Incorrect data {@result}", userData);
         return Results.BadRequest(new { message = "Incorrect data" });
     }
 
@@ -76,6 +84,7 @@ public class UserController : ControllerBase
             var result = await db.DeleteUserAsync(id);
             if (result != null)
                 return Results.Json(result);
+            _logger.LogError("DeleteUserAsync => User Not Found {@result}", result);
             return Results.NotFound(new { message = "Not Found" });
         }
     }
