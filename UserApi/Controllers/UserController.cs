@@ -95,7 +95,7 @@ public class UserController : ControllerBase
                     var result = await _context.UpdateUserAsync(userData);
                     if (result != null)
                         return Results.Json(result);
-                    _logger.LogError("{MethodName} => User Not Found {id}", nameof(ChangeUserAsync), userData.Id);
+                    _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(ChangeUserAsync), userData.Id);
                     return Results.NotFound(new { message = "Not Found" });
                 }
             _logger.LogWarning("{MethodName} => User Incorrect data {result}", nameof(ChangeUserAsync), userData);
