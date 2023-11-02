@@ -11,7 +11,7 @@ Log.Logger = new LoggerConfiguration()
 try {
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllers();
-    builder.Services.AddDbContext<ApplicationContext>();
+    builder.Services.AddDbContext<ApplicationDBContext>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Host.UseSerilog(Log.Logger);
@@ -29,7 +29,7 @@ try {
     app.UseAuthorization();
     app.MapControllers();
 
-    using (ApplicationContext db = new ApplicationContext())
+    using (ApplicationDBContext db = new ApplicationDBContext())
     {
         db.Database.EnsureCreated();
     }

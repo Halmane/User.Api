@@ -3,7 +3,7 @@ using System.Drawing.Printing;
 
 namespace UserApi;
 
-public class ApplicationContext : DbContext
+public class ApplicationDBContext : DbContext
 {
     public DbSet<User> Users { get; set; } = null!;
 

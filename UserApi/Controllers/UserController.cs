@@ -11,9 +11,9 @@ namespace UserApi.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    private readonly ApplicationContext _context;
+    private readonly ApplicationDBContext _context;
 
-    public UserController(ApplicationContext context, ILogger<UserController> logger)
+    public UserController(ApplicationDBContext context, ILogger<UserController> logger)
     {
         _context = context;
         _logger = logger;
@@ -24,18 +24,18 @@ public class UserController : ControllerBase
     {
         try
         {
-            using (ApplicationContext db = new ApplicationContext())
+            using (_context)
             {
-                var result = await db.GetUserAsync(id);
+                var result = await _context.GetUserAsync(id);
                 if (result != null)
                     return Results.Json(result);
-                _logger.LogWarning("{@MethodName} => User Not Found {@id}", nameof(GetUserAsync), id);
+                _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(GetUserAsync), id);
                 return Results.NotFound(new { message = "Not Found" });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "an error occurred in method {@MethodName}", nameof(GetUserAsync));
+            _logger.LogError(ex, "An error occurred in method {MethodName}", nameof(GetUserAsync));
             return Results.StatusCode(500);
         }
     }
@@ -45,18 +45,18 @@ public class UserController : ControllerBase
     {
         try
         {
-            using (ApplicationContext db = new ApplicationContext())
+            using (_context)
             {
-                var result = await db.GetUsersAsync(page, pageSize);
+                var result = await _context.GetUsersAsync(page, pageSize);
                 if (result != null)
                     return Results.Json(result);
-                _logger.LogWarning("{@MethodName} => Users Not Found {@result}", nameof(GetUsersAsync), result);
+                _logger.LogWarning("{MethodName} => Users Not Found {result}", nameof(GetUsersAsync), result);
                 return Results.NotFound(new { message = "Not Found" });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "an error occurred in method {@MethodName}", nameof(GetUsersAsync));
+            _logger.LogError(ex, "An error occurred in method {MethodName}", nameof(GetUsersAsync));
             return Results.StatusCode(500);
         }
     }
@@ -68,18 +68,18 @@ public class UserController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("{@MethodName} => User Incorrect data {@result}", nameof(PostUserAsync), user);
+                _logger.LogWarning("{MethodName} => User Incorrect data {result}", nameof(PostUserAsync), user);
                 return Results.BadRequest(new { message = "Incorrect data" });
             }
             user.Id = Guid.NewGuid().ToString();
-            using (ApplicationContext db = new ApplicationContext())
+            using (_context)
             {
-                return Results.Json(await db.AddUserAsync(user));
+                return Results.Json(await _context.AddUserAsync(user));
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "an error occurred in method {@MethodName}", nameof(PostUserAsync));
+            _logger.LogError(ex, "An error occurred in method {MethodName}", nameof(PostUserAsync));
             return Results.StatusCode(500);
         }
     }
@@ -90,20 +90,20 @@ public class UserController : ControllerBase
         try
         {
             if (ModelState.IsValid)
-                using (ApplicationContext db = new ApplicationContext())
+                using (_context)
                 {
-                    var result = await db.UpdateUserAsync(userData);
+                    var result = await _context.UpdateUserAsync(userData);
                     if (result != null)
                         return Results.Json(result);
-                    _logger.LogError("ChangeUserAsync => User Not Found {@id}", userData.Id);
+                    _logger.LogError("{MethodName} => User Not Found {id}", nameof(ChangeUserAsync), userData.Id);
                     return Results.NotFound(new { message = "Not Found" });
                 }
-            _logger.LogWarning("{@MethodName} => User Incorrect data {@result}", nameof(ChangeUserAsync), userData);
+            _logger.LogWarning("{MethodName} => User Incorrect data {result}", nameof(ChangeUserAsync), userData);
             return Results.BadRequest(new { message = "Incorrect data" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "an error occurred in method {@MethodName}", nameof(ChangeUserAsync));
+            _logger.LogError(ex, "An error occurred in method {MethodName}", nameof(ChangeUserAsync));
             return Results.StatusCode(500);
         }
     }
@@ -113,18 +113,18 @@ public class UserController : ControllerBase
     {
         try
         {
-            using (ApplicationContext db = new ApplicationContext())
+            using (_context)
             {
-                var result = await db.DeleteUserAsync(id);
+                var result = await _context.DeleteUserAsync(id);
                 if (result != null)
                     return Results.Json(result);
-                _logger.LogWarning("{@MethodName} => User Not Found {@id}", nameof(DeleteUserAsync), id);
+                _logger.LogWarning("{MethodName} => User Not Found {id}", nameof(DeleteUserAsync), id);
                 return Results.NotFound(new { message = "Not Found" });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "an error occurred in method {@MethodName}", nameof(DeleteUserAsync));
+            _logger.LogError(ex, "An error occurred in method {MethodName}", nameof(DeleteUserAsync));
             return Results.StatusCode(500);
         }
     }
